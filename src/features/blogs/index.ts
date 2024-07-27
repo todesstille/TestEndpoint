@@ -1,12 +1,11 @@
 import { Router } from "express";
-import { body } from 'express-validator';
 import { createBlogMiddleware } from "./middlewares/blogValidators";
 
 export const blogsRouter = Router();
 
-import { createBlogController } from "./controllers/createBlogControllers";
+import { createBlogController } from "./controllers/createBlogController";
 import { getBlogsController } from "./controllers/getBlogController";
-import { findBlogController } from "./controllers/findBlogControllers";
+import { findBlogController } from "./controllers/findBlogController";
 import { modifyBlogController } from "./controllers/modifyBlogController";
 import { adminMiddleware } from "../../global-middlewares";
 import { deleteBlogController } from "./controllers/deleteBlogController";

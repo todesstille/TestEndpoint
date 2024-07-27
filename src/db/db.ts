@@ -3,11 +3,20 @@ export type Blog = {
     name: string,
     description: string,
     websiteUrl: string
-  }
+}
+
+export type Post = {
+    id: string,
+    title: string,
+    shortDescription: string,
+    content: string,
+    blogId: string,
+    blogName: string,
+}
 
 export class DataBase {
     blogs: Blog[];
-    posts: any[];
+    posts: Post[];
     nextId: number;
 
     constructor() {
@@ -67,5 +76,71 @@ export class DataBase {
                 return;
             }
         }
+    }
+
+    createPost(post: any) {
+        const parentBlog: any = this.findBlogs(post.blogId);
+
+        const currentPost = {
+            id: this.nextId.toString(), 
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            blogId: post.blogId,
+            blogName: parentBlog.name,
+        }
+        this.nextId++;
+        this.posts.push(currentPost);
+        return currentPost;
+    }
+
+    getPosts() {
+        return this.posts;
+    }
+
+    findPosts(id: string): Post | undefined {
+        let post: Post;
+        
+        for (post of this.posts) {
+            if (post.id === id) {
+                return post;
+            }
+        }
+    }
+
+    modifyPost(id: string, data: any) {
+        let post: Post;
+        
+        for (post of this.posts) {
+            if (post.id === id) {
+                const parentBlog: any = this.findBlogs(data.blogId);
+
+                post.title = data.title;
+                post.shortDescription = data.shortDescription;
+                post.content = data.content;
+                post.blogId = data.blogId;
+                post.blogName = parentBlog.name;
+                return;
+            }
+        }
+    }
+
+    deletePost(id: string) {
+        let post: Post;
+        
+        for (let i = 0; i < (this.posts).length; i++) {
+            post = this.posts[i];
+            if (post.id === id) {
+                let lastPost: Post = this.posts[this.posts.length - 1];
+                this.posts[i] = lastPost;
+                this.posts.pop();
+                return;
+            }
+        }
+    }
+
+    clearDB() {
+        this.blogs = [];
+        this.posts = [];
     }
 }

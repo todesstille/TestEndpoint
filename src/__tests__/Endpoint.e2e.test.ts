@@ -13,6 +13,23 @@ const getDefaultBlog = () => {
     }
 }
 
+const getDefaultPost = () => {
+    return {
+        title: "my post",
+        shortDescription: "post description",
+        content: "Hello guys! This is my first post!",
+        blogId: '2'
+    }
+}
+
+const getStringWithLength = (l: number): string => {
+    let s = "";
+    for (let i = 0; i < l; i++) {
+        s += "a";
+    }
+    return s;
+}
+
 describe("Api", () => {
     describe("Version", () => {
         it("correct version", async () => {
@@ -83,7 +100,7 @@ describe("Api", () => {
 
             expect(res.body).toEqual(errorMessage);
 
-            blog.name = "aaaaaaaaaaaaaaaa";
+            blog.name = getStringWithLength(16);
 
             res = await request(app)
             .post('/blogs')
@@ -125,11 +142,7 @@ describe("Api", () => {
 
             expect(res.body).toEqual(errorMessage);
 
-            let bigDescription = "";
-            for (let i = 0; i < 500; i++) {
-                bigDescription += "a";
-            }
-            blog.bigDescription = bigDescription;
+            blog.bigDescription = getStringWithLength(500);
 
             res = await request(app)
             .post('/blogs')
@@ -171,12 +184,7 @@ describe("Api", () => {
 
             expect(res.body).toEqual(errorMessage);
 
-            let bigDescription = "http://";
-            for (let i = 0; i < 500; i++) {
-                bigDescription += "a";
-            }
-            bigDescription += ".com"
-            blog.websiteUrl = bigDescription;
+            blog.websiteUrl = "http://" + getStringWithLength(500) + ".com";
 
             res = await request(app)
             .post('/blogs')
@@ -343,5 +351,382 @@ describe("Api", () => {
             expect(res.body).toEqual([blog]);
 
         });
+    });
+
+    describe("Posts", () => {
+        it("must auth to post", async () => {
+            const res = await request(app)
+                .post('/posts')
+                .send({})
+                .expect(401);            
+        });
+
+        it("all errors on empty object", async () => {
+            const res = await request(app)
+                .post('/posts')
+                .set(auth)
+                .send({})
+                .expect(400);
+
+            expect(res.body).toEqual({
+                errorsMessages: [
+                    {
+                        message: "error!",
+                        field: "title"
+                    },
+                    {
+                        message: "error!",
+                        field: "shortDescription"
+                    },
+                    {
+                        message: "error!",
+                        field: "content"
+                    },
+                    {
+                        message: "error!",
+                        field: "blogId"
+                    }
+                ]
+            })
+        });
+
+        it("error on incorrect title", async () => {
+            const post: any = getDefaultPost();
+            delete post.title;
+
+            const errorMessage = {
+                errorsMessages: [
+                    {
+                        message: "error!",
+                        field: "title"
+                    }
+                ]
+            }
+
+            let res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.name = 13;
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.name = getStringWithLength(31);
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+        });
+
+        it("error on incorrect shortDescription", async () => {
+            const post: any = getDefaultPost();
+            delete post.shortDescription;
+
+            const errorMessage = {
+                errorsMessages: [
+                    {
+                        message: "error!",
+                        field: "shortDescription"
+                    }
+                ]
+            }
+
+            let res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.shortDescription = 13;
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.shortDescription = getStringWithLength(101);
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+        });
+
+        it("error on incorrect content", async () => {
+            const post: any = getDefaultPost();
+            delete post.content;
+
+            const errorMessage = {
+                errorsMessages: [
+                    {
+                        message: "error!",
+                        field: "content"
+                    }
+                ]
+            }
+
+            let res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.content = 13;
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.content = getStringWithLength(1001);
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+        });
+
+        it("error on incorrect blogId", async () => {
+            const post: any = getDefaultPost();
+            delete post.blogId;
+
+            const errorMessage = {
+                errorsMessages: [
+                    {
+                        message: "error!",
+                        field: "blogId"
+                    }
+                ]
+            }
+
+            let res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.blogId = 13;
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+
+            post.blogId = '1';
+
+            res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
+        });
+
+        it("parces correct request", async () => {
+            const post: any = getDefaultPost();
+            const correctResponce: any = getDefaultPost();
+            correctResponce.id = "3";
+            correctResponce.blogName = "my blog";
+
+            const res = await request(app)
+            .post('/posts')
+            .set(auth)
+            .send(post)
+            .expect(201);
+
+            expect(res.body).toEqual(correctResponce);
+        });
+
+        it("could get list of posts", async () => {
+            const correctResponce: any = getDefaultPost();
+            correctResponce.id = "3";
+            correctResponce.blogName = "my blog";
+
+            const res = await request(app)
+            .get('/posts')
+            .expect(200);
+
+            expect(res.body).toEqual([correctResponce]);
+        });
+
+        it("could find post", async () => {
+            const correctResponce: any = getDefaultPost();
+            correctResponce.id = "3";
+            correctResponce.blogName = "my blog";
+
+            const res = await request(app)
+            .get('/posts/3')
+            .expect(200);
+
+            expect(res.body).toEqual(correctResponce);
+
+            await request(app)
+            .get('/posts/4')
+            .expect(404);
+        });
+
+        it("must auth to modify post", async () => {
+            await request(app)
+                .put('/posts/3')
+                .send({})
+                .expect(401);            
+        });
+
+        it("can't modify post if incorrect id", async () => {
+            const post = getDefaultPost();
+
+            await request(app)
+            .put('/posts/4')
+            .set(auth)
+            .send(post)
+            .expect(404);
+        });
+
+        it("can't modify post if incorrect data", async () => {
+            const res = await request(app)
+            .put('/posts/3')
+            .set(auth)
+            .send({})
+            .expect(400);
+
+            expect(res.body).toEqual({
+                errorsMessages: [
+                    {
+                        message: "error!",
+                        field: "title"
+                    },
+                    {
+                        message: "error!",
+                        field: "shortDescription"
+                    },
+                    {
+                        message: "error!",
+                        field: "content"
+                    },
+                    {
+                        message: "error!",
+                        field: "blogId"
+                    }
+                ]
+            })
+        });
+
+        it("can't modify post if incorrect blogId", async () => {
+            const post = getDefaultPost();
+            post.blogId = '4';
+
+            const res = await request(app)
+            .put('/posts/3')
+            .set(auth)
+            .send(post)
+            .expect(400);
+
+            expect(res.body).toEqual({
+                errorsMessages: [
+                    {
+                        message: "error!",
+                        field: "blogId"
+                    }
+                ]
+            })
+        });
+
+        it("could modify post", async () => {
+            const blog: any = getDefaultBlog();
+            blog.name = "one more blog";
+
+            const t = await request(app)
+            .post('/blogs')
+            .set(auth)
+            .send(blog)
+            .expect(201);
+
+            const post: any = getDefaultPost();
+            post.blogId = '4';
+
+            await request(app)
+            .put('/posts/3')
+            .set(auth)
+            .send(post)
+            .expect(204);
+
+            let res = await request(app).get('/posts/3');
+            post.id = '3';
+            post.blogName = "one more blog";
+            expect(res.body).toEqual(post);
+        });
+
+        it("could delete", async () => {
+
+            await request(app)
+            .delete('/posts/3')
+            .set(auth)
+            .send({})
+            .expect(204);
+
+            const res = await request(app)
+            .get('/posts')
+            .send({})
+            .expect(200)
+
+            expect(res.body).toEqual([]);
+
+        });
+    });
+
+    describe("Testing", () => {
+        it("clears database", async () => {
+            await request(app).delete('/testing/all-data').expect(204);
+
+            let res = await request(app)
+            .get('/posts')
+            .send({})
+            .expect(200)
+
+            expect(res.body).toEqual([]);
+
+            res = await request(app)
+            .get('/blogs')
+            .send({})
+            .expect(200)
+
+            expect(res.body).toEqual([]);
+        })
     })
 })

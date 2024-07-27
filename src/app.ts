@@ -5,6 +5,8 @@ import cors from 'cors';
 import { SETTINGS } from "./settings";
 import { DataBase } from "./db/db";
 import { blogsRouter } from "./features/blogs";
+import { postsRouter } from "./features/posts";
+import { testingRouter } from "./features/testing";
 
 export const db = new DataBase();
 
@@ -16,3 +18,5 @@ app.get("/", (req, res) => {
 })
 
 app.use(SETTINGS.PATH.BLOGS, blogsRouter);
+app.use(SETTINGS.PATH.POSTS, postsRouter);
+app.use(SETTINGS.PATH.TESTING, testingRouter);

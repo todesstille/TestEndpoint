@@ -1,6 +1,7 @@
 import express from "express";
 export const app = express();
 import cors from 'cors';
+import {Response, Request, NextFunction} from 'express';
 
 import { SETTINGS } from "./settings";
 import { DataBase } from "./db/db";
@@ -10,8 +11,17 @@ import { testingRouter } from "./features/testing";
 
 export const db = new DataBase();
 
+function trimmer(req: Request, res: Response, next: NextFunction) {
+    for (const [key, value] of Object.entries(req.body)) {
+        if (typeof(value) === 'string')
+            req.body[key] = value.trim();
+    }
+    next();
+}
+
 app.use(express.json());
 app.use(cors());
+app.use(trimmer);
 
 app.get("/", (req, res) => {
     res.status(200).json({version: '1.0'});

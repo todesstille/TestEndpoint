@@ -109,6 +109,16 @@ describe("Api", () => {
             .expect(400);
 
             expect(res.body).toEqual(errorMessage);
+
+            blog.name = "      ";
+
+            res = await request(app)
+            .post('/blogs')
+            .set(auth)
+            .send(blog)
+            .expect(400);
+
+            expect(res.body).toEqual(errorMessage);
         });
 
         it("error on incorrect description", async () => {

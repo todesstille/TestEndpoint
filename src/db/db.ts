@@ -1,3 +1,6 @@
+import { MongoClient, Db, Collection } from 'mongodb';
+import { SETTINGS } from '../settings';
+
 export type Blog = {
     id: string,
     name: string,
@@ -17,12 +20,49 @@ export type Post = {
 export class DataBase {
     blogs: Blog[];
     posts: Post[];
+    blogsDB: Collection<Blog> | null;
+    postsDB: Collection<Post> | null;
     nextId: number;
 
     constructor() {
         this.blogs = [];
         this.posts = [];
-        this.nextId = 1; 
+        this.nextId = 1;
+        this.blogsDB = null; 
+        this.postsDB = null;
+    }
+
+    async init(client: MongoClient) {
+        const db: Db = client.db(SETTINGS.DB_NAME);
+
+        this.blogsDB = db.collection<Blog>(SETTINGS.BLOG_COLLECTION_NAME);
+        this.postsDB = db.collection<Post>(SETTINGS.POST_COLLECTION_NAME);
+ 
+        try {
+            await client.connect()
+            console.log('connected to db')
+        } catch (e) {
+            console.log(e)
+            await client.close()
+        }
+
+        // try {
+        //     await this.blogsDB?.insertOne({
+        //         name: "my blog",
+        //         description: "basic description",
+        //         websiteUrl: "http://test.com",
+        //         id: "777"
+        //     });
+        // } catch(err) {
+        //     console.log("Error writing in DB", err);
+        // }
+
+        // try {
+        //     const result = await this.blogsDB?.findOne({id: "777"});
+        //     console.log(result);
+        // } catch(err) {
+        //     console.log("Error searching in DB", err);
+        // }
     }
 
     createBlog(blog: any) {

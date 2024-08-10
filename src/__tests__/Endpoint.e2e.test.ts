@@ -1,7 +1,11 @@
 import request from 'supertest'
-import { app } from '../app'
+import { app, db } from '../app'
 import {fromUTF8ToBase64} from '../global-middlewares'
 import {SETTINGS} from '../settings'
+import {MongoMemoryServer} from "mongodb-memory-server";
+import { MongoClient } from 'mongodb';
+
+let server: any;
 
 const auth = {'Authorization': 'Basic ' + fromUTF8ToBase64(SETTINGS.ADMIN)}
 
@@ -31,6 +35,19 @@ const getStringWithLength = (l: number): string => {
 }
 
 describe("Api", () => {
+    beforeAll(async () => {
+        server = await MongoMemoryServer.create()
+ 
+        const uri = server.getUri()
+        const client: MongoClient = new MongoClient(uri)
+
+        await db.init(client);
+    });
+
+    afterAll(async () => {
+        await server.stop();
+    });
+    
     describe("Version", () => {
         it("correct version", async () => {
             await request(app).get('/').expect({version: '1.0'});

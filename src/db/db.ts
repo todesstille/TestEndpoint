@@ -65,7 +65,7 @@ export class DataBase {
         // }
     }
 
-    createBlog(blog: any) {
+    async createBlog(blog: any) {
         const currentBlog = {
             id: this.nextId.toString(), 
             name: blog.name,
@@ -77,11 +77,11 @@ export class DataBase {
         return currentBlog;
     }
 
-    getBlogs() {
+    async getBlogs() {
         return this.blogs;
     }
 
-    findBlogs(id: string): Blog | undefined {
+    async findBlogs(id: string): Promise<Blog | undefined> {
         let blog: Blog;
         
         for (blog of this.blogs) {
@@ -91,7 +91,7 @@ export class DataBase {
         }
     }
 
-    modifyBlog(id: string, data: any) {
+    async modifyBlog(id: string, data: any) {
         let blog: Blog;
         
         for (blog of this.blogs) {
@@ -104,7 +104,7 @@ export class DataBase {
         }
     }
 
-    deleteBlog(id: string) {
+    async deleteBlog(id: string) {
         let blog: Blog;
         
         for (let i = 0; i < (this.blogs).length; i++) {
@@ -118,8 +118,8 @@ export class DataBase {
         }
     }
 
-    createPost(post: any) {
-        const parentBlog: any = this.findBlogs(post.blogId);
+    async createPost(post: any) {
+        const parentBlog: any = await this.findBlogs(post.blogId);
 
         const currentPost = {
             id: this.nextId.toString(), 
@@ -134,11 +134,11 @@ export class DataBase {
         return currentPost;
     }
 
-    getPosts() {
+    async getPosts() {
         return this.posts;
     }
 
-    findPosts(id: string): Post | undefined {
+    async findPosts(id: string): Promise<Post | undefined> {
         let post: Post;
         
         for (post of this.posts) {
@@ -148,12 +148,12 @@ export class DataBase {
         }
     }
 
-    modifyPost(id: string, data: any) {
+    async modifyPost(id: string, data: any) {
         let post: Post;
         
         for (post of this.posts) {
             if (post.id === id) {
-                const parentBlog: any = this.findBlogs(data.blogId);
+                const parentBlog: any = await this.findBlogs(data.blogId);
 
                 post.title = data.title;
                 post.shortDescription = data.shortDescription;
@@ -165,7 +165,7 @@ export class DataBase {
         }
     }
 
-    deletePost(id: string) {
+    async deletePost(id: string) {
         let post: Post;
         
         for (let i = 0; i < (this.posts).length; i++) {
@@ -179,7 +179,7 @@ export class DataBase {
         }
     }
 
-    clearDB() {
+    async clearDB() {
         this.blogs = [];
         this.posts = [];
     }

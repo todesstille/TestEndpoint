@@ -59,7 +59,7 @@ describe("Api", () => {
             const res = await request(app)
                 .post('/blogs')
                 .send({})
-                .expect(401);            
+                .expect(401);
         })
         it("all errors on empty object", async () => {
             const res = await request(app)
@@ -333,7 +333,7 @@ describe("Api", () => {
             await request(app)
                 .delete('/blogs/1')
                 .send({})
-                .expect(401);            
+                .expect(401);
         })
 
         it("can't delete if incorrect id", async () => {

@@ -1,4 +1,4 @@
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, WithId } from 'mongodb';
 import { SETTINGS } from '../settings';
 
 export type Blog = {
@@ -45,24 +45,6 @@ export class DataBase {
             console.log(e)
             await client.close()
         }
-
-        // try {
-        //     await this.blogsDB?.insertOne({
-        //         name: "my blog",
-        //         description: "basic description",
-        //         websiteUrl: "http://test.com",
-        //         id: "777"
-        //     });
-        // } catch(err) {
-        //     console.log("Error writing in DB", err);
-        // }
-
-        // try {
-        //     const result = await this.blogsDB?.findOne({id: "777"});
-        //     console.log(result);
-        // } catch(err) {
-        //     console.log("Error searching in DB", err);
-        // }
     }
 
     async createBlog(blog: any) {
@@ -73,49 +55,63 @@ export class DataBase {
             websiteUrl: blog.websiteUrl
         }
         this.nextId++;
-        this.blogs.push(currentBlog);
+
+        try {
+            await this.blogsDB?.insertOne({... currentBlog});
+        } catch(err) {
+            console.log("Error writing in DB", err);
+        }
         return currentBlog;
     }
 
     async getBlogs() {
-        return this.blogs;
+        let blogs: WithId<Blog>[] | undefined;
+        let returnedBlogs = [];
+        try {
+            blogs = await this.blogsDB?.find({}).toArray();
+        } catch(err) {
+            console.log("Error searching in DB", err);
+        }
+
+        if (blogs === undefined) {
+            return [];
+        } else {
+            for (let blog of blogs) {
+                returnedBlogs.push(this.removeIdFromBlog(blog));
+            }
+            return returnedBlogs;
+        }
     }
 
     async findBlogs(id: string): Promise<Blog | undefined> {
-        let blog: Blog;
         
-        for (blog of this.blogs) {
-            if (blog.id === id) {
-                return blog;
-            }
+        let blog;
+        try {
+            blog = await this.blogsDB?.findOne({id: id});
+        } catch(err) {
+            console.log("Error searching in DB", err);
         }
+
+        if (blog === null || blog === undefined) {
+            return undefined
+        } else {
+            return this.removeIdFromBlog(blog);
+        };
     }
 
     async modifyBlog(id: string, data: any) {
-        let blog: Blog;
-        
-        for (blog of this.blogs) {
-            if (blog.id === id) {
-                blog.name = data.name;
-                blog.description = data.description;
-                blog.websiteUrl = data.websiteUrl;
-                return;
-            }
-        }
+        let blog: Blog = {
+            id: id,
+            name: data.name,
+            description: data.description,
+            websiteUrl: data.websiteUrl
+        };
+
+        const ttt = await this.blogsDB?.updateOne({id: id}, {$set: blog});
     }
 
     async deleteBlog(id: string) {
-        let blog: Blog;
-        
-        for (let i = 0; i < (this.blogs).length; i++) {
-            blog = this.blogs[i];
-            if (blog.id === id) {
-                let lastBlog: Blog = this.blogs[this.blogs.length - 1];
-                this.blogs[i] = lastBlog;
-                this.blogs.pop();
-                return;
-            }
-        }
+        await this.blogsDB?.deleteOne({id: id});
     }
 
     async createPost(post: any) {
@@ -181,6 +177,17 @@ export class DataBase {
 
     async clearDB() {
         this.blogs = [];
+        await this.blogsDB?.deleteMany({});
         this.posts = [];
+    }
+
+    removeIdFromBlog(mongoBlog: WithId<Blog>): Blog { 
+        const { _id, ...blog } = mongoBlog;
+        return blog;
+    }
+
+    removeIdFromPost(mongoPost: WithId<Post>): Post { 
+        const { _id, ...post } = mongoPost;
+        return post;
     }
 }

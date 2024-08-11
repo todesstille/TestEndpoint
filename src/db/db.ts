@@ -107,7 +107,7 @@ export class DataBase {
             websiteUrl: data.websiteUrl
         };
 
-        const ttt = await this.blogsDB?.updateOne({id: id}, {$set: blog});
+        await this.blogsDB?.updateOne({id: id}, {$set: blog});
     }
 
     async deleteBlog(id: string) {
@@ -125,59 +125,74 @@ export class DataBase {
             blogId: post.blogId,
             blogName: parentBlog.name,
         }
-        this.nextId++;
-        this.posts.push(currentPost);
+        try {
+            await this.postsDB?.insertOne({... currentPost});
+        } catch(err) {
+            console.log("Error writing in DB", err);
+        }
         return currentPost;
     }
 
     async getPosts() {
-        return this.posts;
+        let posts: WithId<Post>[] | undefined;
+        let returnedPosts = [];
+        try {
+            posts = await this.postsDB?.find({}).toArray();
+        } catch(err) {
+            console.log("Error searching in DB", err);
+        }
+
+        if (posts === undefined) {
+            return [];
+        } else {
+            for (let post of posts) {
+                returnedPosts.push(this.removeIdFromPost(post));
+            }
+            return returnedPosts;
+        }
     }
 
     async findPosts(id: string): Promise<Post | undefined> {
-        let post: Post;
         
-        for (post of this.posts) {
-            if (post.id === id) {
-                return post;
-            }
+        let post;
+        try {
+            post = await this.postsDB?.findOne({id: id});
+        } catch(err) {
+            console.log("Error searching in DB", err);
         }
+
+        if (post === null || post === undefined) {
+            return undefined
+        } else {
+            return this.removeIdFromPost(post);
+        };
     }
 
     async modifyPost(id: string, data: any) {
-        let post: Post;
-        
-        for (post of this.posts) {
-            if (post.id === id) {
-                const parentBlog: any = await this.findBlogs(data.blogId);
-
-                post.title = data.title;
-                post.shortDescription = data.shortDescription;
-                post.content = data.content;
-                post.blogId = data.blogId;
-                post.blogName = parentBlog.name;
-                return;
-            }
+        const blog = await this.findBlogs(data.blogId);
+        if (blog === undefined) {
+            throw new Error("error finding in db");
         }
+        let post: Post = {
+            id: id,
+            title: data.title,
+            content: data.content,
+            shortDescription: data.shortDescription,
+            blogId: data.blogId,
+            blogName: blog.name
+        };
+
+        await this.postsDB?.updateOne({id: id}, {$set: post});
     }
 
     async deletePost(id: string) {
-        let post: Post;
-        
-        for (let i = 0; i < (this.posts).length; i++) {
-            post = this.posts[i];
-            if (post.id === id) {
-                let lastPost: Post = this.posts[this.posts.length - 1];
-                this.posts[i] = lastPost;
-                this.posts.pop();
-                return;
-            }
-        }
+        await this.postsDB?.deleteOne({id: id});
     }
 
     async clearDB() {
         this.blogs = [];
         await this.blogsDB?.deleteMany({});
+        await this.postsDB?.deleteMany({});
         this.posts = [];
     }
 

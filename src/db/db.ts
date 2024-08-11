@@ -34,6 +34,9 @@ export class DataBase {
     async init(client: MongoClient) {
         const db: Db = client.db(SETTINGS.DB_NAME);
 
+        await db.collection(SETTINGS.BLOG_COLLECTION_NAME).drop();
+        await db.collection(SETTINGS.POST_COLLECTION_NAME).drop();
+
         this.blogsDB = db.collection<Blog>(SETTINGS.BLOG_COLLECTION_NAME);
         this.postsDB = db.collection<Post>(SETTINGS.POST_COLLECTION_NAME);
  

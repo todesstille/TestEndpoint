@@ -18,7 +18,11 @@ export const createPostMiddleware = [
 
     body('blogId').exists().withMessage('blogId field not exist')
         .isString().withMessage('blogId is not string')
-        .custom((blogId) => {
-            return (db.findBlogs(blogId) != undefined )
-        }).withMessage('blogId is invalid')
+        .custom(async (blogId) => {
+            const blog = await db.findBlogs(blogId);
+            if (blog === undefined) {
+              throw new Error('blogId is invalid');
+            }
+            return true;
+          })
 ]

@@ -1,7 +1,12 @@
 import request from 'supertest'
-import { app } from '../app'
+import { app, db } from '../app'
 import {fromUTF8ToBase64} from '../global-middlewares'
 import {SETTINGS} from '../settings'
+import {MongoMemoryServer} from "mongodb-memory-server";
+import { MongoClient } from 'mongodb';
+
+let mongoServer: any;
+let mongoClient: any;
 
 const auth = {'Authorization': 'Basic ' + fromUTF8ToBase64(SETTINGS.ADMIN)}
 
@@ -31,6 +36,25 @@ const getStringWithLength = (l: number): string => {
 }
 
 describe("Api", () => {
+    beforeAll(async () => {
+        mongoServer = await MongoMemoryServer.create();
+        const uri = mongoServer.getUri();
+        mongoClient = new MongoClient(uri);
+        await mongoClient.connect();
+        await db.init(mongoClient);
+    });
+
+    afterAll(async () => {
+        if (mongoClient) {
+            await mongoClient.close();
+        }
+
+        if (mongoServer) {
+            await mongoServer.stop();
+        }
+
+    }, 15000);
+
     describe("Version", () => {
         it("correct version", async () => {
             await request(app).get('/').expect({version: '1.0'});
@@ -42,7 +66,7 @@ describe("Api", () => {
             const res = await request(app)
                 .post('/blogs')
                 .send({})
-                .expect(401);            
+                .expect(401);
         })
         it("all errors on empty object", async () => {
             const res = await request(app)
@@ -226,6 +250,8 @@ describe("Api", () => {
             .send(blog)
             .expect(201);
 
+            correctResponce.createdAt = res.body.createdAt;
+
             expect(res.body).toEqual(correctResponce);
         });
 
@@ -237,6 +263,8 @@ describe("Api", () => {
             .get('/blogs')
             .expect(200);
 
+            correctResponce.createdAt = res.body[0].createdAt;
+
             expect(res.body).toEqual([correctResponce]);
         });
 
@@ -247,6 +275,8 @@ describe("Api", () => {
             const res = await request(app)
             .get('/blogs/1')
             .expect(200);
+
+            correctResponce.createdAt = res.body.createdAt;
 
             expect(res.body).toEqual(correctResponce);
 
@@ -309,6 +339,7 @@ describe("Api", () => {
 
             let res = await request(app).get('/blogs/1');
             blog.id = '1';
+            blog.createdAt = res.body.createdAt;
             expect(res.body).toEqual(blog);
         });
 
@@ -316,7 +347,7 @@ describe("Api", () => {
             await request(app)
                 .delete('/blogs/1')
                 .send({})
-                .expect(401);            
+                .expect(401);
         })
 
         it("can't delete if incorrect id", async () => {
@@ -357,6 +388,8 @@ describe("Api", () => {
             .get('/blogs')
             .send({})
             .expect(200)
+
+            blog.createdAt = res.body[0].createdAt;
 
             expect(res.body).toEqual([blog]);
 
@@ -573,12 +606,15 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .post('/posts')
             .set(auth)
             .send(post)
             .expect(201);
+
+            correctResponce.createdAt = res.body.createdAt;
 
             expect(res.body).toEqual(correctResponce);
         });
@@ -587,10 +623,13 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/posts')
             .expect(200);
+
+            correctResponce.createdAt = res.body[0].createdAt;
 
             expect(res.body).toEqual([correctResponce]);
         });
@@ -599,10 +638,13 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/posts/3')
             .expect(200);
+
+            correctResponce.createdAt = res.body.createdAt;
 
             expect(res.body).toEqual(correctResponce);
 
@@ -688,7 +730,7 @@ describe("Api", () => {
             .expect(201);
 
             const post: any = getDefaultPost();
-            post.blogId = '4';
+            post.blogId = '3';
 
             await request(app)
             .put('/posts/3')
@@ -699,6 +741,8 @@ describe("Api", () => {
             let res = await request(app).get('/posts/3');
             post.id = '3';
             post.blogName = "one more blog";
+            post.isMembership = false;
+            post.createdAt = res.body.createdAt;
             expect(res.body).toEqual(post);
         });
 

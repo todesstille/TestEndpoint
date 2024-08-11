@@ -705,7 +705,7 @@ describe("Api", () => {
             .expect(201);
 
             const post: any = getDefaultPost();
-            post.blogId = '4';
+            post.blogId = '3';
 
             await request(app)
             .put('/posts/3')

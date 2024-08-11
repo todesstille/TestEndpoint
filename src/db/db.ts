@@ -7,6 +7,7 @@ export type Blog = {
     description: string,
     websiteUrl: string,
     createdAt: string,
+    isMembership: boolean,
 }
 
 export type Post = {
@@ -17,7 +18,6 @@ export type Post = {
     blogId: string,
     blogName: string,
     createdAt: string,
-    isMembership: boolean,
 }
 
 export class DataBase {
@@ -52,6 +52,7 @@ export class DataBase {
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl,
+            isMembership: false,
             createdAt: new Date().toISOString(),
         }
         this.nextId++;
@@ -124,7 +125,6 @@ export class DataBase {
             content: post.content,
             blogId: post.blogId,
             blogName: parentBlog.name,
-            isMembership: false,
             createdAt: new Date().toISOString(),
         }
         try {

@@ -243,6 +243,7 @@ describe("Api", () => {
             const blog: any = getDefaultBlog();
             const correctResponce: any = getDefaultBlog();
             correctResponce.id = "1";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .post('/blogs')
@@ -258,6 +259,7 @@ describe("Api", () => {
         it("could get list of blogs", async () => {
             const correctResponce: any = getDefaultBlog();
             correctResponce.id = "1";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/blogs')
@@ -271,6 +273,7 @@ describe("Api", () => {
         it("could find blog", async () => {
             const correctResponce: any = getDefaultBlog();
             correctResponce.id = "1";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/blogs/1')
@@ -340,6 +343,7 @@ describe("Api", () => {
             let res = await request(app).get('/blogs/1');
             blog.id = '1';
             blog.createdAt = res.body.createdAt;
+            blog.isMembership = false;
             expect(res.body).toEqual(blog);
         });
 
@@ -390,6 +394,7 @@ describe("Api", () => {
             .expect(200)
 
             blog.createdAt = res.body[0].createdAt;
+            blog.isMembership = false;
 
             expect(res.body).toEqual([blog]);
 
@@ -606,7 +611,6 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
-            correctResponce.isMembership = false;
 
             const res = await request(app)
             .post('/posts')
@@ -623,7 +627,6 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
-            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/posts')
@@ -638,7 +641,6 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
-            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/posts/3')
@@ -741,7 +743,6 @@ describe("Api", () => {
             let res = await request(app).get('/posts/3');
             post.id = '3';
             post.blogName = "one more blog";
-            post.isMembership = false;
             post.createdAt = res.body.createdAt;
             expect(res.body).toEqual(post);
         });

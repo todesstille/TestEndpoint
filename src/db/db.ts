@@ -15,7 +15,7 @@ export type Post = {
     content: string,
     blogId: string,
     blogName: string,
-    // isMembership: boolean
+    isMembership: boolean
 }
 
 export class DataBase {
@@ -121,6 +121,7 @@ export class DataBase {
             content: post.content,
             blogId: post.blogId,
             blogName: parentBlog.name,
+            isMembership: false,
         }
         try {
             await this.postsDB?.insertOne({... currentPost});
@@ -176,7 +177,8 @@ export class DataBase {
             content: data.content,
             shortDescription: data.shortDescription,
             blogId: data.blogId,
-            blogName: blog.name
+            blogName: blog.name,
+            isMembership: false
         };
 
         await this.postsDB?.updateOne({id: id}, {$set: post});

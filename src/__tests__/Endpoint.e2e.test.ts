@@ -597,6 +597,7 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .post('/posts')
@@ -611,6 +612,7 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/posts')
@@ -623,6 +625,7 @@ describe("Api", () => {
             const correctResponce: any = getDefaultPost();
             correctResponce.id = "3";
             correctResponce.blogName = "my blog";
+            correctResponce.isMembership = false;
 
             const res = await request(app)
             .get('/posts/3')
@@ -723,6 +726,7 @@ describe("Api", () => {
             let res = await request(app).get('/posts/3');
             post.id = '3';
             post.blogName = "one more blog";
+            post.isMembership = false;
             expect(res.body).toEqual(post);
         });
 

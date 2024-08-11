@@ -57,7 +57,7 @@ describe("Api", () => {
 
     describe("Version", () => {
         it("correct version", async () => {
-            await request(app).get('/').expect({version: '3.0'});
+            await request(app).get('/').expect({version: '4.0'});
         })
     })
 

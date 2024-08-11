@@ -5,7 +5,8 @@ import {SETTINGS} from '../settings'
 import {MongoMemoryServer} from "mongodb-memory-server";
 import { MongoClient } from 'mongodb';
 
-let server: any;
+let mongoServer: any;
+let mongoClient: any;
 
 const auth = {'Authorization': 'Basic ' + fromUTF8ToBase64(SETTINGS.ADMIN)}
 
@@ -36,18 +37,24 @@ const getStringWithLength = (l: number): string => {
 
 describe("Api", () => {
     beforeAll(async () => {
-        server = await MongoMemoryServer.create()
- 
-        const uri = server.getUri()
-        const client: MongoClient = new MongoClient(uri)
-
-        await db.init(client);
+        mongoServer = await MongoMemoryServer.create();
+        const uri = mongoServer.getUri();
+        mongoClient = new MongoClient(uri);
+        await mongoClient.connect();
+        await db.init(mongoClient);
     });
 
     afterAll(async () => {
-        await server.stop();
-    });
-    
+        if (mongoClient) {
+            await mongoClient.close();
+        }
+
+        if (mongoServer) {
+            await mongoServer.stop();
+        }
+
+    }, 15000);
+
     describe("Version", () => {
         it("correct version", async () => {
             await request(app).get('/').expect({version: '1.0'});

@@ -15,18 +15,15 @@ export type Post = {
     content: string,
     blogId: string,
     blogName: string,
+    // isMembership: boolean
 }
 
 export class DataBase {
-    blogs: Blog[];
-    posts: Post[];
     blogsDB: Collection<Blog> | null;
     postsDB: Collection<Post> | null;
     nextId: number;
 
     constructor() {
-        this.blogs = [];
-        this.posts = [];
         this.nextId = 1;
         this.blogsDB = null; 
         this.postsDB = null;
@@ -190,10 +187,8 @@ export class DataBase {
     }
 
     async clearDB() {
-        this.blogs = [];
         await this.blogsDB?.deleteMany({});
         await this.postsDB?.deleteMany({});
-        this.posts = [];
     }
 
     removeIdFromBlog(mongoBlog: WithId<Blog>): Blog { 

@@ -250,6 +250,8 @@ describe("Api", () => {
             .send(blog)
             .expect(201);
 
+            correctResponce.createdAt = res.body.createdAt;
+
             expect(res.body).toEqual(correctResponce);
         });
 
@@ -261,6 +263,8 @@ describe("Api", () => {
             .get('/blogs')
             .expect(200);
 
+            correctResponce.createdAt = res.body[0].createdAt;
+
             expect(res.body).toEqual([correctResponce]);
         });
 
@@ -271,6 +275,8 @@ describe("Api", () => {
             const res = await request(app)
             .get('/blogs/1')
             .expect(200);
+
+            correctResponce.createdAt = res.body.createdAt;
 
             expect(res.body).toEqual(correctResponce);
 
@@ -333,6 +339,7 @@ describe("Api", () => {
 
             let res = await request(app).get('/blogs/1');
             blog.id = '1';
+            blog.createdAt = res.body.createdAt;
             expect(res.body).toEqual(blog);
         });
 
@@ -381,6 +388,8 @@ describe("Api", () => {
             .get('/blogs')
             .send({})
             .expect(200)
+
+            blog.createdAt = res.body[0].createdAt;
 
             expect(res.body).toEqual([blog]);
 
@@ -605,6 +614,8 @@ describe("Api", () => {
             .send(post)
             .expect(201);
 
+            correctResponce.createdAt = res.body.createdAt;
+
             expect(res.body).toEqual(correctResponce);
         });
 
@@ -618,6 +629,8 @@ describe("Api", () => {
             .get('/posts')
             .expect(200);
 
+            correctResponce.createdAt = res.body[0].createdAt;
+
             expect(res.body).toEqual([correctResponce]);
         });
 
@@ -630,6 +643,8 @@ describe("Api", () => {
             const res = await request(app)
             .get('/posts/3')
             .expect(200);
+
+            correctResponce.createdAt = res.body.createdAt;
 
             expect(res.body).toEqual(correctResponce);
 
@@ -727,6 +742,7 @@ describe("Api", () => {
             post.id = '3';
             post.blogName = "one more blog";
             post.isMembership = false;
+            post.createdAt = res.body.createdAt;
             expect(res.body).toEqual(post);
         });
 

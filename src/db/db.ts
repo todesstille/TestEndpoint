@@ -5,7 +5,8 @@ export type Blog = {
     id: string,
     name: string,
     description: string,
-    websiteUrl: string
+    websiteUrl: string,
+    createdAt: string,
 }
 
 export type Post = {
@@ -15,7 +16,8 @@ export type Post = {
     content: string,
     blogId: string,
     blogName: string,
-    isMembership: boolean
+    createdAt: string,
+    isMembership: boolean,
 }
 
 export class DataBase {
@@ -49,7 +51,8 @@ export class DataBase {
             id: this.nextId.toString(), 
             name: blog.name,
             description: blog.description,
-            websiteUrl: blog.websiteUrl
+            websiteUrl: blog.websiteUrl,
+            createdAt: new Date().toISOString(),
         }
         this.nextId++;
 
@@ -97,7 +100,7 @@ export class DataBase {
     }
 
     async modifyBlog(id: string, data: any) {
-        let blog: Blog = {
+        let blog: any = {
             id: id,
             name: data.name,
             description: data.description,
@@ -122,6 +125,7 @@ export class DataBase {
             blogId: post.blogId,
             blogName: parentBlog.name,
             isMembership: false,
+            createdAt: new Date().toISOString(),
         }
         try {
             await this.postsDB?.insertOne({... currentPost});
@@ -171,14 +175,13 @@ export class DataBase {
         if (blog === undefined) {
             throw new Error("error finding in db");
         }
-        let post: Post = {
+        let post: any = {
             id: id,
             title: data.title,
             content: data.content,
             shortDescription: data.shortDescription,
             blogId: data.blogId,
             blogName: blog.name,
-            isMembership: false
         };
 
         await this.postsDB?.updateOne({id: id}, {$set: post});

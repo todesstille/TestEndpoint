@@ -24,7 +24,7 @@ app.use(cors());
 app.use(trimmer);
 
 app.get("/", (req, res) => {
-    res.status(200).json({version: '1.0'});
+    res.status(200).json({version: '2.0'});
 })
 
 app.use(SETTINGS.PATH.BLOGS, blogsRouter);
